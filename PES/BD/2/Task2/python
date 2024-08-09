@@ -1,0 +1,37 @@
+comment @user1 @user2 1 "So beautiful" 
+like @user1 @user2 1
+share @user1 @user2 1 @user3 @user4 @user5 
+like @user1 @user3 1 
+share @user1 @user3 1 @user5
+like @user2 @user3 1
+comment @user2 @user3 1 "Brilliant"
+comment @user1 @user2 2 "Stunning"
+like @user1 @user2 2
+share @user1 @user2 2 @user3 @user4 @user5 @user6 @user7 @user8 @user9
+EOF
+from json import loads, dumps
+from kafka import KafaProducer
+import sys
+
+producer = KafaProducer(
+    bootstrap_servers = ['localhost:9092'],
+    value_serializer = lambda x:dumps(x).encode('utf-8')
+)
+
+comments = sys.argv[1]
+likes = sys.argv[2]
+eve = sys.argv[3]
+
+for line in sys.stdin:
+    if('EOF' in line) break
+    words = line
+    if line[:7] == "comment":
+        message = {'comment': line[8:]}
+        producer.send(comments, value=message)
+        
+    elif line[:4] == "like":
+        message = {'like': line[5:]}
+        producer.send(likes, value=message)
+    else:
+        message = {'share': line[6:]}
+    producer.send(eve, value=message)

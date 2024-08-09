@@ -2,3 +2,5 @@ build/
 *.exe
 *.txt
 *.tsv
+*.csv
+*.json
