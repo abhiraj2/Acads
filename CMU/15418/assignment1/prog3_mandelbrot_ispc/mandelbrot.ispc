@@ -1,5 +1,4 @@
 
-
 static inline int mandel(float c_re, float c_im, int count) {
     float z_re = c_re, z_im = c_im;
     int i;
@@ -26,14 +25,14 @@ export void mandelbrot_ispc(uniform float x0, uniform float y0,
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
 
-    foreach (j = 0 ... height, i = 0 ... width) {
-            float x = x0 + i * dx;
-            float y = y0 + j * dy;
+    foreach(j = 0 ... height, i = 0 ... width){
+        float x = x0 + i * dx;
+        float y = y0 + j * dy;
 
-            int index = j * width + i;
-            output[index] = mandel(x, y, maxIterations);
+        int index = j * width + i;
+        output[index] = mandel(x, y, maxIterations);
     }
-}
+}   
 
 // slightly different kernel to support tasking
 task void mandelbrot_ispc_task(uniform float x0, uniform float y0, 
@@ -48,7 +47,7 @@ task void mandelbrot_ispc_task(uniform float x0, uniform float y0,
     
     uniform int ystart = taskIndex * rowsPerTask;
     uniform int yend = min(ystart + rowsPerTask, height);
-    
+    //print("%d\t%d\n",ystart, yend);
     uniform float dx = (x1 - x0) / width;
     uniform float dy = (y1 - y0) / height;
     
@@ -68,8 +67,8 @@ export void mandelbrot_ispc_withtasks(uniform float x0, uniform float y0,
                                       uniform int output[])
 {
 
-    uniform int threadCount = 2;
-    uniform int rowsPerTask = height / threadCount;
+    uniform int threadCount = 8;
+    uniform int rowsPerTask = (uniform int)ceil((uniform float)height / (uniform float)threadCount);
 
     // create threadCount tasks
     launch[threadCount] mandelbrot_ispc_task(x0, y0, x1, y1,
